@@ -23,9 +23,6 @@
 		{
 			"type": "cppbuild",
 			"label": "C/C++: g++.exe link active file",
-			"dependsOn": [
-				"C/C++: g++.exe build active file"
-			],
 			"command": "g++",
 			"args": [
 				"main.o",
@@ -46,11 +43,23 @@
 			"problemMatcher": [
 				"$gcc"
 			],
+			"detail": "compiler: \"C:/Program Files/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/bin/g++.exe\""
+		},
+		{
+			"type": "shell",
+			"label": "Build",
+			"command": "mingw32-make",
+			"options": {
+				"cwd": "${fileDirname}"
+			},
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: \"C:/Program Files/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/bin/g++.exe\""
-		},
+			"presentation": {
+				"reveal": "silent",
+				"clear": true
+			  }
+		}
 	]
 }
