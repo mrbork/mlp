@@ -11,10 +11,10 @@ Network::Network(std::vector<int> network){
 Network::Network(std::vector<std::vector<float>> neurons)
 {
     this->neurons = neurons;
-    weights = std::vector<std::vector<std::vector<float>>>(neurons.size() - 2);
+    weights = std::vector<std::vector<std::vector<float>>>(neurons.size() - 1);
 
-    //Loop through hidden layers and add weights to each hidden neuron
-    for (int neuronLayer = 1; neuronLayer < getLayers()-1; neuronLayer++)
+    //Loop through layers and add weights to each neuron
+    for (int neuronLayer = 1; neuronLayer < getLayers(); neuronLayer++)
     {
         for (int neuron = 0; neuron < getLayerSize(neuronLayer); neuron++)
         {
@@ -25,6 +25,9 @@ Network::Network(std::vector<std::vector<float>> neurons)
             }
         }
     }
+
+    weights[1][0][1] = 0.1;
+    weights[1][0][2] = 0.2;
 }
 
 float Network::forward_propagation(){
@@ -80,30 +83,45 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &te
             text.setPosition(x, y);
             circle.setPosition(x, y);
 
-            // for (int next_node = 0; next_node < getLayerSize(layer + 1); next_node++)
-            // {
+            //Compute neuron sum
+            if (layer != 0) //Hidden layers
+            {
+                float sum = 0;
+                for (int weight = 0; weight < weights[layer-1][node].size(); weight++)
+                {
+                    sum += weights[layer-1][node][weight] * neurons[layer-1][weight];
+                }
+                neurons[layer][node] = sigmoid(sum);
 
-            //     float v_dist = HEIGHT / (getLayerSize(layer + 1) + 1);
-            //     float nx = h_dist * (1 + layer + 1);
-            //     float ny = v_dist * (1 + next_node);
+            }
 
-            //     sf::Text wtext("", font, 10);
-            //     wtext.setStyle(sf::Text::Bold);
-            //     wtext.setOrigin(wtext.getCharacterSize() / 2, wtext.getCharacterSize() / 2);
-            //     wtext.setPosition(circle.getPosition().x + ((nx - circle.getPosition().x) / 2), circle.getPosition().y + ((ny - circle.getPosition().y) / 2));
-            //     std::string val = std::to_string(weights[layer][node]);
-            //     val.resize(4);
-            //     wtext.setString(val);
+            for (int next_node = 0; next_node < getLayerSize(layer + 1); next_node++)
+            {
+                for (int weight = 0; weight < weights[layer][0].size(); weight++)
+                {
 
-            //     sf::VertexArray line(sf::LinesStrip, 2);
-            //     line[0].position = circle.getPosition();
-            //     line[0].color = sf::Color::White;
-            //     line[1].position = sf::Vector2f(nx, ny);
-            //     line[1].color = sf::Color::White;
+                float v_dist = HEIGHT / (getLayerSize(layer + 1) + 1);
+                float nx = h_dist * (1 + layer + 1);
+                float ny = v_dist * (1 + next_node);
 
-            //     window.draw(line);
-            //     window.draw(wtext);
-            // }
+                sf::Text wtext("", font, 20);
+                wtext.setStyle(sf::Text::Bold);
+                wtext.setOrigin(wtext.getCharacterSize() / 2, wtext.getCharacterSize() / 2);
+                wtext.setPosition(circle.getPosition().x + ((nx - circle.getPosition().x) / 2), circle.getPosition().y + ((ny - circle.getPosition().y) / 2));
+                std::string val = std::to_string(weights[layer][next_node][weight]); //**
+                val.resize(4);
+                wtext.setString(val);
+
+                sf::VertexArray line(sf::LinesStrip, 2);
+                line[0].position = circle.getPosition();
+                line[0].color = sf::Color::White;
+                line[1].position = sf::Vector2f(nx, ny);
+                line[1].color = sf::Color::White;
+
+                window.draw(line);
+                window.draw(wtext);
+                }
+            }
 
             window.draw(circle);
             window.draw(text);
