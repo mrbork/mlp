@@ -1,45 +1,70 @@
 #include "Network.h"
 
-float sigmoid(float val){
-    return (val /(1 + abs(val)));
+float sigmoid(float val)
+{
+    return (val / (1 + std::abs(val)));
 }
 
-Network::Network(std::vector<int> network){
-
-};
-
-Network::Network(std::vector<std::vector<float>> neurons)
+Network::Network(std::vector<int> networkLayout)
 {
-    this->neurons = neurons;
+    neurons = std::vector<std::vector<float>>(networkLayout.size());
     weights = std::vector<std::vector<std::vector<float>>>(neurons.size() - 1);
 
-    //Loop through layers and add weights to each neuron
-    for (int neuronLayer = 1; neuronLayer < getLayers(); neuronLayer++)
+
+    // Initialize neurons
+    for (int neuronLayer = 0; neuronLayer < networkLayout.size(); neuronLayer++)
+    {
+        for (int neuronCount = 0; neuronCount < networkLayout[neuronLayer]; neuronCount++)
+        {
+            neurons[neuronLayer].push_back(0.0f);
+        }
+    }
+
+    // Initialize weights
+    for (int neuronLayer = 0; neuronLayer < getLayers() - 1; neuronLayer++)
     {
         for (int neuron = 0; neuron < getLayerSize(neuronLayer); neuron++)
         {
-            weights[neuronLayer-1].push_back(std::vector<float>());
-            for (int weight = 0; weight < getLayerSize(neuronLayer-1) ; weight++)
+            weights[neuronLayer].push_back(std::vector<float>());
+            for (int weight = 0; weight < getLayerSize(neuronLayer + 1); weight++)
             {
-                weights[neuronLayer-1][neuron].push_back(neurons[neuronLayer][neuron]);
+                weights[neuronLayer][neuron].push_back(rand() % 2 - 1); //-1, 0, 1
+            }
+        }
+    }
+}
+
+float Network::forward_propagation(std::vector<float> inputs)
+{
+    for (int input = 0; input < inputs.size(); input++)
+        neurons[0][input] = inputs[input];
+
+    for (int layer = 0; layer < getLayers(); layer++)
+    {
+        for (int neuron = 0; neuron < getLayerSize(layer); neuron++)
+        {
+            if (layer != 0)
+            {
+                float sum = 0;
+                for (int previousNeuron = 0; previousNeuron < getLayerSize(layer - 1); previousNeuron++)
+                    sum += neurons[layer - 1][previousNeuron] * weights[layer - 1][previousNeuron][neuron];
+
+                neurons[layer][neuron] = sigmoid(sum);
             }
         }
     }
 
-    weights[1][0][1] = 0.1;
-    weights[1][0][2] = 0.2;
-}
-
-float Network::forward_propagation(){
-    
+    return neurons[neurons.size() - 1][neurons[neurons.size() - 1].size() - 1];
 };
 
 void Network::backward_propation(){
 
 };
 
-void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &text)
+void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font)
 {
+    static sf::Text text("", font, 20);
+    static sf::Text wtext("", font, 10);
 
     float max = neurons[0][0];
     float min = max;
@@ -60,9 +85,9 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &te
         float h_dist = WIDTH / (getLayers() + 1);
         float v_dist = HEIGHT / (getLayerSize(layer) + 1);
 
-        for (int node = 0; node < getLayerSize(layer); node++)
+        for (int neuron = 0; neuron < getLayerSize(layer); neuron++)
         {
-            float contrib = 1 - (neurons[layer][node] - min) / (max - min);
+            float contrib = 1 - (neurons[layer][neuron] - min) / (max - min);
 
             sf::CircleShape circle(35);
             circle.setOrigin(circle.getRadius(), circle.getRadius());
@@ -71,10 +96,10 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &te
             circle.setOutlineColor(sf::Color::White);
 
             float x = h_dist * (1 + layer);
-            float y = v_dist * (1 + node);
+            float y = v_dist * (1 + neuron);
 
-            std::string val = std::to_string(neurons[layer][node]);
-            val.resize(4);
+            std::string val = std::to_string(neurons[layer][neuron]);
+            val.resize(4); //negative sign taking char space
             text.setString(val);
 
             text.setOrigin(22, 13);
@@ -83,32 +108,17 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &te
             text.setPosition(x, y);
             circle.setPosition(x, y);
 
-            //Compute neuron sum
-            if (layer != 0) //Hidden layers
-            {
-                float sum = 0;
-                for (int weight = 0; weight < weights[layer-1][node].size(); weight++)
-                {
-                    sum += weights[layer-1][node][weight] * neurons[layer-1][weight];
-                }
-                neurons[layer][node] = sigmoid(sum);
-
-            }
-
             for (int next_node = 0; next_node < getLayerSize(layer + 1); next_node++)
             {
-                for (int weight = 0; weight < weights[layer][0].size(); weight++)
-                {
 
                 float v_dist = HEIGHT / (getLayerSize(layer + 1) + 1);
                 float nx = h_dist * (1 + layer + 1);
                 float ny = v_dist * (1 + next_node);
 
-                sf::Text wtext("", font, 20);
                 wtext.setStyle(sf::Text::Bold);
                 wtext.setOrigin(wtext.getCharacterSize() / 2, wtext.getCharacterSize() / 2);
                 wtext.setPosition(circle.getPosition().x + ((nx - circle.getPosition().x) / 2), circle.getPosition().y + ((ny - circle.getPosition().y) / 2));
-                std::string val = std::to_string(weights[layer][next_node][weight]); //**
+                std::string val = std::to_string(weights[layer][neuron][next_node]);
                 val.resize(4);
                 wtext.setString(val);
 
@@ -120,7 +130,6 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &te
 
                 window.draw(line);
                 window.draw(wtext);
-                }
             }
 
             window.draw(circle);

@@ -7,7 +7,7 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML", sf::Style::Close);
 	window.setVerticalSyncEnabled(true);
 
-	Network network({{0.9, 0.9}, {0.7, 0.7, 0.7}, {0.5}});
+	Network network({2,3,1});
 
 	sf::Font font;
 	if (!font.loadFromFile("OCRAEXT.TTF"))
@@ -73,13 +73,13 @@ int main()
 				break;
 			case sf::Event::Count:
 				break;
-			
-			}
+						}
 		}
 		//------End of Event Handler--------
 		window.clear();
 
-		network.drawNetwork(window, font, text);
+		float output = network.forward_propagation({0.5, 0.2});
+		network.drawNetwork(window, font);
 
 		window.display();
 	}

@@ -3,16 +3,15 @@
 class Network
 {
 public:
-    Network(std::vector<int> network);
-    Network(std::vector<std::vector<float>> neurons);
+    Network(std::vector<int> networkLayout);
 
     ~Network() = default;
 
-    float forward_propagation();
+    float forward_propagation(std::vector<float> inputs);
 
     void backward_propation();
 
-    void drawNetwork(sf::RenderWindow &window, sf::Font &font, sf::Text &text);
+    void drawNetwork(sf::RenderWindow &window, sf::Font &font);
 
     std::vector<std::vector<float>> getNeurons();
     std::vector<std::vector<std::vector<float>>> getWeights();
