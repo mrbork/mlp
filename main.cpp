@@ -1,19 +1,41 @@
-#include "Network.h"
 #include "Globals.h"
+#include "Network.h"
+
+float costFunction(float target, float output)
+{
+	return 0.5 * pow(target - output, 2);
+}
 
 int main()
 {
-
-	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML", sf::Style::Close);
+	sf::RenderWindow window(sf::VideoMode(510 + NWIDTH, 400), "SFML", sf::Style::Close);
 	window.setVerticalSyncEnabled(true);
 
-	Network network({2,3,1});
+	Network network({2, 3, 1});
 
 	sf::Font font;
+	sf::Text text("", font, 20);
+
 	if (!font.loadFromFile("OCRAEXT.TTF"))
 		printf("Failed to load font\n");
 
-	sf::Text text("", font, 20);
+	sf::Image image;
+	image.create(OUTPUT_WIDTH, OUTPUT_HEIGHT);
+
+	sf::Texture texture;
+	texture.loadFromImage(image);
+
+	sf::Sprite pixels;
+	pixels.setPosition(NWIDTH,0);
+	pixels.setScale(CWIDTH / OUTPUT_WIDTH, CHEIGHT / OUTPUT_HEIGHT);
+	pixels.setTexture(texture);
+
+	std::vector<std::pair<int,int>> inputs;
+
+	for (int i = 0; i < OUTPUT_WIDTH; i++)
+		for (int j= 0; j < OUTPUT_HEIGHT; j++)
+			inputs.push_back(std::pair<int,int>(i,j));
+
 
 	while (window.isOpen())
 	{
@@ -73,13 +95,27 @@ int main()
 				break;
 			case sf::Event::Count:
 				break;
-						}
+			}
 		}
 		//------End of Event Handler--------
 		window.clear();
 
-		float output = network.forward_propagation({0.5, 0.2});
 		network.drawNetwork(window, font);
+
+		std::random_shuffle(inputs.begin(), inputs.end());
+		for (auto input: inputs)
+		{
+			float output = network.forward_propagation({input.first, input.second});
+			image.setPixel(input.first, input.second, sf::Color(255 * output,255 * output, 255 * output));
+
+			float target = (input.first == input.second) ? 1.0f : 0.0f;
+			//network.backward_propation(input, output, target);
+		}
+
+
+		texture.update(image);
+
+		window.draw(pixels);
 
 		window.display();
 	}

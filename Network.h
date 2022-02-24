@@ -1,4 +1,5 @@
 #include "Globals.h"
+#include "Perceptron.h"
 
 class Network
 {
@@ -7,13 +8,13 @@ public:
 
     ~Network() = default;
 
-    float forward_propagation(std::vector<float> inputs);
+    float forward_propagation(std::vector<int> inputs);
 
-    void backward_propation();
+    void backward_propation(std::pair<int,int> input, float output, float target);
 
-    void drawNetwork(sf::RenderWindow &window, sf::Font &font);
+    void drawNetwork(sf::RenderWindow &window, sf::Font& font);
 
-    std::vector<std::vector<float>> getNeurons();
+    std::vector<std::vector<Perceptron>> getNeurons();
     std::vector<std::vector<std::vector<float>>> getWeights();
 
     int getLayers();
@@ -23,6 +24,8 @@ public:
     void setWeight(int layer, int neuron, int weight, float val);
 
 private:
-    std::vector<std::vector<float>> neurons;
+    std::vector<std::vector<Perceptron>> neurons;
     std::vector<std::vector<std::vector<float>>> weights;
+
+    std::vector<std::vector<std::vector<float>>> errors;
 };
