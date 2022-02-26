@@ -20,6 +20,8 @@ public:
     float getDelta();
     float getWeight(int weight);
 
+    void addWeight(float weight);
+
     std::vector<float> getWeights();
 
 private:

@@ -1,8 +1,9 @@
 #include "Perceptron.h"
 
 Perceptron::Perceptron()
+: value{}, delta{}, x{}, y{}
 {
-
+    
 }
 
 Perceptron::Perceptron(int numWeights)
@@ -82,4 +83,9 @@ float Perceptron::getX()
 float Perceptron::getY()
 {
     return y;
+}
+
+void Perceptron::addWeight(float weight)
+{
+    weights.push_back(weight);
 }

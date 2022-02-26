@@ -15,17 +15,13 @@ public:
     void drawNetwork(sf::RenderWindow &window, sf::Font& font);
 
     std::vector<std::vector<Perceptron>> getNeurons();
-    std::vector<std::vector<std::vector<float>>> getWeights();
 
     int getLayers();
     int getLayerSize(int layer);
 
     void setNeuron(int layer, int neuron, float val);
-    void setWeight(int layer, int neuron, int weight, float val);
 
 private:
     std::vector<std::vector<Perceptron>> neurons;
-    std::vector<std::vector<std::vector<float>>> weights;
-
     std::vector<std::vector<std::vector<float>>> errors;
 };

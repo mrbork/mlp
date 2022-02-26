@@ -13,7 +13,6 @@ float sigmoidDerivative(float val)
 Network::Network(std::vector<int> networkLayout)
 {
     neurons = std::vector<std::vector<Perceptron>>(networkLayout.size());
-    weights = std::vector<std::vector<std::vector<float>>>(neurons.size() - 1);
 
     // Initialize neurons
     for (int neuronLayer = 0; neuronLayer < networkLayout.size(); neuronLayer++)
@@ -21,15 +20,14 @@ Network::Network(std::vector<int> networkLayout)
         neurons[neuronLayer] = std::vector<Perceptron>(networkLayout[neuronLayer]);
     }
 
-    // Initialize weights
-    for (int neuronLayer = 0; neuronLayer < getLayers() - 1; neuronLayer++)
+    //Initialize weights
+    for (int neuronLayer = neurons.size() - 1; neuronLayer > 0; neuronLayer--)
     {
-        for (int neuron = 0; neuron < getLayerSize(neuronLayer); neuron++)
+        for (Perceptron& neuron: neurons[neuronLayer])
         {
-            weights[neuronLayer].push_back(std::vector<float>());
-            for (int weight = 0; weight < getLayerSize(neuronLayer + 1); weight++)
+            for (int input = 0; input < getLayerSize(neuronLayer - 1); input++)
             {
-                weights[neuronLayer][neuron].push_back(rand() % 3 - 1); //-1, 0, 1
+                neuron.addWeight(rand() % 3 - 1); //-1, 0, 1
             }
         }
     }
@@ -42,15 +40,17 @@ float Network::forward_propagation(std::vector<int> inputs)
 
     for (int layer = 0; layer < getLayers(); layer++)
     {
-        for (int neuron = 0; neuron < getLayerSize(layer); neuron++)
+        for (int neuronIndex = 0; neuronIndex < getLayerSize(layer); neuronIndex++)
         {
+            Perceptron& neuron = neurons[layer][neuronIndex];
+
             if (layer != 0)
             {
                 float sum = 0;
                 for (int previousNeuron = 0; previousNeuron < getLayerSize(layer - 1); previousNeuron++)
-                    sum += neurons[layer - 1][previousNeuron].getValue() * weights[layer - 1][previousNeuron][neuron];
-
-                neurons[layer][neuron].setValue(sigmoid(sum));
+                    sum += neurons[layer - 1][previousNeuron].getValue() * neuron.getWeight(previousNeuron);
+                
+                neurons[layer][neuronIndex].setValue(sigmoid(sum));
             }
         }
     }
@@ -135,6 +135,7 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font& font)
 
             for (int next_node = 0; next_node < getLayerSize(layer + 1); next_node++)
             {
+                Perceptron& nextNeuron = neurons[layer+1][next_node];
 
                 float v_dist = NHEIGHT / (getLayerSize(layer + 1) + 1);
                 float nx = h_dist * (1 + layer + 1);
@@ -143,13 +144,13 @@ void Network::drawNetwork(sf::RenderWindow &window, sf::Font& font)
                 text.setStyle(sf::Text::Bold);
                 text.setOrigin(text.getCharacterSize() / 2, text.getCharacterSize() / 2);
                 text.setPosition(node.getX() + ((nx - node.getX()) / 2), node.getY() + ((ny - node.getY()) / 2));
-                std::string val = std::to_string(std::abs(weights[layer][neuron][next_node]));
+                std::string val = std::to_string(std::abs(nextNeuron.getWeight(neuron)));
                 val.resize(4);
                 text.setString(val);
 
                 sf::VertexArray line(sf::LinesStrip, 2);
                 line[0].position = sf::Vector2f(node.getX(), node.getY());
-                line[0].color = (weights[layer][neuron][next_node] < 0) ? sf::Color::Red : sf::Color::Green; 
+                line[0].color = (nextNeuron.getWeight(neuron) < 0) ? sf::Color::Red : sf::Color::Green; 
                 line[1].position = sf::Vector2f(nx, ny);
                 line[1].color = line[0].color;
 
@@ -168,11 +169,6 @@ std::vector<std::vector<Perceptron>> Network::getNeurons()
     return neurons;
 };
 
-std::vector<std::vector<std::vector<float>>> Network::getWeights()
-{
-    return weights;
-};
-
 int Network::getLayers()
 {
     return neurons.size();
@@ -186,9 +182,4 @@ int Network::getLayerSize(int layer)
 void Network::setNeuron(int layer, int neuron, float val)
 {
     neurons[layer][neuron].setValue(val);
-};
-
-void Network::setWeight(int layer, int neuron, int weight, float val)
-{
-    weights[layer][neuron][weight] = val;
 };
