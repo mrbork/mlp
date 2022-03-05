@@ -1,17 +1,14 @@
 #include "Perceptron.h"
 
 Perceptron::Perceptron()
-: value{}, delta{}, x{}, y{}
+: value{}, delta{}, x{}, y{}, weights{}
 {
     
 }
 
-Perceptron::Perceptron(int numWeights)
+Perceptron::Perceptron(int value)
+: value{value}, delta{}, x{}, y{}, weights{}
 {
-    for (int weight = 0; weight < numWeights; weight++)
-    {
-        weights.push_back(rand() % 2 - 1);
-    }
 }
 
 void Perceptron::draw(float x, float y, sf::RenderWindow &window, sf::Font& font, float gradient)
@@ -43,6 +40,12 @@ void Perceptron::draw(float x, float y, sf::RenderWindow &window, sf::Font& font
 
 void Perceptron::updateWeights(float delta)
 {
+    std::vector<float> previousWeights = weights; //For line search
+    
+    for (int weight = 0; weight < previousInputs.size(); weight++)  
+    {
+        weights[weight + 1] -= delta * previousInputs[weight] * LEARNING_RATE;
+    }
 }
 
 void Perceptron::setValue(float value)
@@ -50,9 +53,19 @@ void Perceptron::setValue(float value)
     this->value = value;
 }
 
+void Perceptron::setDelta(float delta)
+{
+    this->delta = delta;
+}
+
 void Perceptron::setWeights(std::vector<float> weights)
 {
     this->weights = weights;
+}
+
+void Perceptron::setpreviousInputs(std::vector<int> previousInputs)
+{
+    this->previousInputs = previousInputs;
 }
 
 float Perceptron::getValue()

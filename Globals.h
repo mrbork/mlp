@@ -15,4 +15,4 @@
 #define OUTPUT_WIDTH 64
 #define OUTPUT_HEIGHT 64
 
-#define LEARNING_RATE 0.1
+#define LEARNING_RATE 0.03

@@ -22,6 +22,8 @@ public:
     void setNeuron(int layer, int neuron, float val);
 
 private:
+    std::pair<float,float> getMaxMin();
+
     std::vector<std::vector<Perceptron>> neurons;
     std::vector<std::vector<std::vector<float>>> errors;
 };

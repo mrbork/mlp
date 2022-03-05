@@ -11,10 +11,11 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(510 + NWIDTH, 400), "SFML", sf::Style::Close);
 	window.setVerticalSyncEnabled(true);
 
-	Network network({2, 3, 1});
+	Network network({2, 2, 1});
 
 	sf::Font font;
-	sf::Text text("", font, 20);
+	sf::Text text("", font, 15);
+	text.setString("Error: ");
 
 	if (!font.loadFromFile("OCRAEXT.TTF"))
 		printf("Failed to load font\n");
@@ -26,16 +27,15 @@ int main()
 	texture.loadFromImage(image);
 
 	sf::Sprite pixels;
-	pixels.setPosition(NWIDTH,0);
+	pixels.setPosition(NWIDTH, 0);
 	pixels.setScale(CWIDTH / OUTPUT_WIDTH, CHEIGHT / OUTPUT_HEIGHT);
 	pixels.setTexture(texture);
 
-	std::vector<std::pair<int,int>> inputs;
+	std::vector<std::pair<int, int>> inputs;
 
 	for (int i = 0; i < OUTPUT_WIDTH; i++)
-		for (int j= 0; j < OUTPUT_HEIGHT; j++)
-			inputs.push_back(std::pair<int,int>(i,j));
-
+		for (int j = 0; j < OUTPUT_HEIGHT; j++)
+			inputs.push_back(std::pair<int, int>(i, j));
 
 	while (window.isOpen())
 	{
@@ -100,22 +100,34 @@ int main()
 		//------End of Event Handler--------
 		window.clear();
 
-		network.drawNetwork(window, font);
+		network.drawNetwork(window, font); 
+
+		float error = 0;
 
 		std::random_shuffle(inputs.begin(), inputs.end());
-		for (auto input: inputs)
+		for (auto input : inputs)
 		{
 			float output = network.forward_propagation({input.first, input.second});
-			image.setPixel(input.first, input.second, sf::Color(255 * output,255 * output, 255 * output));
+			image.setPixel(input.first, input.second, sf::Color(255 * output, 255 * output, 255 * output));
 
-			float target = (input.first == input.second) ? 1.0f : 0.0f;
-			//network.backward_propation(input, output, target);
+			float target = (input.first < input.second) ? 1.0f : 0.0f;
+			//float target = (input.first < input.second + 10 && input.first > input.second -10) ? 1.0f : 0.0f;
+
+			network.backward_propation(input, output, target);
+
+			//Reference 
+			//image.setPixel(input.first, input.second, sf::Color(255 * target, 255 * target, 255 * target));
+
+
+			error += std::abs( output - target );
 		}
 
+		text.setString(std::to_string(error));
 
 		texture.update(image);
 
 		window.draw(pixels);
+		window.draw(text);
 
 		window.display();
 	}
