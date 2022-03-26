@@ -11,7 +11,7 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(510 + NWIDTH, 400), "SFML", sf::Style::Close);
 	window.setVerticalSyncEnabled(true);
 
-	Network network({2, 2, 1});
+	Network network({2, 1});
 
 	sf::Font font;
 	sf::Text text("", font, 15);
