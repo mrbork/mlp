@@ -1,4 +1,5 @@
 main.exe
 main.o
 Network.o
+Perceptron.o
 .vscode/settings.json

@@ -42,6 +42,8 @@ void Perceptron::updateWeights(float delta)
 {
     std::vector<float> previousWeights = weights; //For line search
     
+    weights[0] -= delta * LEARNING_RATE; 
+    
     for (int weight = 0; weight < previousInputs.size(); weight++)  
     {
         weights[weight + 1] -= delta * previousInputs[weight] * LEARNING_RATE;
